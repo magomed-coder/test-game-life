@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+        }
+
+        .game-container {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(20, 20px);
+            border: 1px solid gray;
+        }
+
+        .container div {
+            background-color: rgb(0, 255, 140);
+        }
+
+
+        div.alive {
+            background-color: red;
+        }
+    </style>
+    <script src="game.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- клетки -->
+    </div>
+
+    <div class="game-container">
+        <button onclick="game.startGame()">Start</button>
+        <button onclick="game.stopGame()">Stop</button>
+        <button onclick="game.clearGrid()">Очистить</button>
+
+        <input type="number" class="grid_size" placeholder="Размер поля">
+        <button onclick="game.changeGridSize()">Изменить размер поля</button>
+
+        <div>время: <span class="timer">00:00:00</span></div>
+    </div>
+</body>
+
+</html>
