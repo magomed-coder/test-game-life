@@ -39,6 +39,7 @@ class GameOfLife {
 
         this.container.addEventListener('click', this.handleCellClick)
 
+        this.addElements(this)
         this.createGrid()
     }
 
@@ -100,10 +101,6 @@ class GameOfLife {
             }
         }
 
-        // console.log("createGrid:.grid ", `${this.grid}`)
-        // console.log("createGrid:.nextGrid ", `${this.nextGrid}`)
-        // console.log("createGrid:nextGrid ", this.nextGrid)
-
         if (!this.isGame) this.stopGame();
         this.updateUIState()
 
@@ -155,11 +152,6 @@ class GameOfLife {
 
     // создания сетки с клетками нужного размера и количества -> оптимизировать добавление в документ
     createGrid() {
-        this.container.innerHTML = '';
-
-        const newLng = Math.floor(1000 / this.gridSize)
-        this.container.style.gridTemplateColumns = `repeat(${this.gridSize}, ${newLng}px)`;
-
         this.grid = [];
         this.nextGrid = [];
 
@@ -168,22 +160,59 @@ class GameOfLife {
             this.nextGrid[i] = [];
 
             for (let j = 0; j < this.gridSize; j++) {
-                const cell = document.createElement('div');
-                cell.dataset.row = i;
-                cell.dataset.col = j;
-
-                cell.style.width = `${newLng}px`;
-                cell.style.height = `${newLng}px`;
-
-                this.container.appendChild(cell);
                 this.grid[i][j] = 0;
                 this.nextGrid[i][j] = 0;
             }
         }
 
-        this.cellsElements = this.container.querySelectorAll('div');
-
         console.log("createGrid: ", this.grid)
+        this.createCells()
+    }
+
+    createCells() {
+        this.totalElements = this.gridSize * this.gridSize
+        this.batchSize = 50000
+        this.currentIndex = 0
+
+        this.container.innerHTML = '';
+
+        const newLng = Math.floor(1000 / this.gridSize)
+        this.container.style.gridTemplateColumns = `repeat(${this.gridSize}, ${newLng}px)`;
+
+        console.log("createCells: ")
+
+        this.addElements(newLng)
+    }
+
+    addElements(lng) {
+
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 0; i < this.batchSize && this.currentIndex < this.totalElements; i++) {
+            const cell = document.createElement('div');
+
+            cell.dataset.row = Math.floor(this.currentIndex / this.gridSize); // Находим строку
+            cell.dataset.col = this.currentIndex % this.gridSize; // Находим столбец
+
+            cell.style.width = `${lng}px`;
+            cell.style.height = `${lng}px`;
+
+            fragment.appendChild(cell);
+            this.currentIndex++;
+        }
+
+        this.container.appendChild(fragment);
+
+        if (this.currentIndex < this.totalElements) {
+            requestAnimationFrame(this.addElements(lng));
+        }
+
+        if (this.currentIndex == this.totalElements) {
+
+            this.cellsElements = this.container.querySelectorAll('div');
+            console.log("addElements: ", this.cellsElements)
+        }
+
     }
 
     // Нажатие на контейнер меняет состояние клетки 
@@ -215,28 +244,19 @@ class GameOfLife {
 
     // добавляет случайное состояние для клеток(1 - живая клетка, 0 - мертвая) 
     randomGridState() {
-        let arr = []
-
         for (let i = 0; i < this.gridSize; i++) {
             this.grid[i] = [];
             this.nextGrid[i] = [];
-
-            // this.grid[i] = this.grid[i].length > 0 ? this.grid[i] : [];
-            // this.nextGrid[i] = this.nextGrid[i].length > 0 ? this.nextGrid[i] : [];;
-
 
             for (let j = 0; j < this.gridSize; j++) {
                 const randomState = Math.random() > lifeProbability ? 1 : 0;
 
                 this.grid[i][j] = randomState
                 this.nextGrid[i][j] = randomState
-
-                arr.push(randomState)
             }
         }
 
         console.log("randomGridState/ grid:", this.grid)
-        console.log("randomGridState/ arr:", arr)
     }
 
     // при изменении значения в документе считывается значение и перерисовываются клетки(метод this.createGrid)
